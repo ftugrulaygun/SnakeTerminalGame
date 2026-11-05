@@ -90,8 +90,27 @@ void Arena::removeDeadSnakes()
         }else
         {
             if(current == firstSnake)
+            {   
+                if(current->getNext() == nullptr)
+                {
+                    delete current;
+                    firstSnake = nullptr;
+                    lastSnake = nullptr;
+                }else{
+                    delete current;
+                    firstSnake = next; 
+                }
+            }else if(current == lastSnake)
+            {   
+                delete current;
+                lastSnake = previous;
+                previous = lastSnake;
+                previous->setNext(nullptr);
+            }else
             {
-                
+                Snake* next = current->getNext();
+                delete current;
+                previous->setNext(next);
             }
         }
         current = next;
@@ -106,7 +125,7 @@ void Arena::killSnake(Snake *s)
     //           << " and score " << score << "." << std::endl;
     //  - Every cell of its body becomes FOOD_CELL on the board.
     //  - Mark it dead and remove it from the leaderboard.
-    //  Note: tick() may still b    e iterating over the player list.
+    //  Note: tick() may still be iterating over the player list.
 }
 
 // ---------------------------------------------------------------- movement
