@@ -126,6 +126,22 @@ void Arena::killSnake(Snake *s)
     //  - Every cell of its body becomes FOOD_CELL on the board.
     //  - Mark it dead and remove it from the leaderboard.
     //  Note: tick() may still be iterating over the player list.
+    std::cout << "Snake " << s->getId() << " died with length " << s->getLength() << " and score " << s->getScore() << "." << std::endl;
+
+    Segment* current = s->getBody().getHead();
+    
+    while(current != nullptr)
+    {
+        Segment* next = current->getNext();
+        int row = current->getRow();
+        int col = current->getCol();
+        
+        board.set(row, col, FOOD_CELL);
+        current = next;
+    }
+    s->setAlive(false);
+    leaderboard.remove(s);
+    
 }
 
 // ---------------------------------------------------------------- movement
