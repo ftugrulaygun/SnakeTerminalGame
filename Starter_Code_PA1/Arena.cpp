@@ -156,6 +156,8 @@ void Arena::moveSnake(Snake *s)
     //   "Snake A bit Snake B at (nr,nc). Snake B lost K segment(s)."
     //   "Snake A ate food at (nr,nc)."
     // The board must always show the head as the uppercase id, body as lowercase.
+    char lowerId = static_cast<char>(std::tolower(static_cast<unsigned char>(s->getId())));
+
     Segment* head = s->getBody().getHead();
     int newRow = head->getRow();
     int newCol = head->getCol();
@@ -175,9 +177,9 @@ void Arena::moveSnake(Snake *s)
 
     bool isOwnTail = (newRow == tailRow && newCol == tailCol);
 
-   
+    char cell = board.get(newRow, newCol);
     
-    if(board.get(newRow, newCol) == EMPTY_CELL)
+    if(cell == EMPTY_CELL)
     {
         int oldHeadRow = head->getRow();
         int oldHeadCol = head->getCol();
@@ -191,22 +193,83 @@ void Arena::moveSnake(Snake *s)
         board.set(newRow, newCol, static_cast<char>(std::toupper(static_cast<unsigned char>(s->getId()))));
 
 
-    }else if(board.get(newRow, newCol) == static_cast<char>(std::tolower(static_cast<unsigned char>(s->getId()))))
+    }else if(cell == static_cast<char>(std::tolower(static_cast<unsigned char>(s->getId()))))
     {
+        if(isOwnTail)
+        {
+            int oldHeadRow = head->getRow();
+            int oldHeadCol = head->getCol();
 
-    }else if(board.get(newRow, newCol) == FOOD_CELL)
+            s->getBody().pushFront(newRow, newCol);
+            bool pop = s->getBody().popBack(tailRow, tailCol);
+
+            board.set(oldHeadRow, oldHeadCol, static_cast<char>(std::tolower(static_cast<unsigned char>(s->getId()))));
+            board.set(tailRow, tailCol, EMPTY_CELL);
+            board.set(newRow, newCol, static_cast<char>(std::toupper(static_cast<unsigned char>(s->getId()))));
+        }else
+        {
+            std::cout << "Snake " << s->getId() << " bit itself at (" << newRow << "," << newCol << ")." << std::endl; 
+            killSnake(s);
+            return;
+        }
+
+    }else if(cell == FOOD_CELL)
     {
+        int oldHeadRow = head->getRow();
+        int oldHeadCol = head->getCol();
 
-    }else if(board.get(newRow, newCol) == WALL_CELL)
+        s->getBody().pushFront(newRow, newCol);
+
+        board.set(oldHeadRow, oldHeadCol, static_cast<char>(std::tolower(static_cast<unsigned char>(s->getId()))));
+        board.set(newRow, newCol, static_cast<char>(std::toupper(static_cast<unsigned char>(s->getId()))));
+
+        s->addScore(1);
+        leaderboard.reposition(s);
+
+        std::cout << "Snake " << s->getId() << " ate food at (" << newRow << "," << newCol << ")." << std::endl;
+
+    }else if(cell == WALL_CELL)
     {
         std::cout << "Snake " << s->getId() << " hit a wall at (" << newRow << "," << newCol << ")." << std::endl;
         killSnake(s);
         return;
-    }else if(isOwnTail)
+    }else if('a' <= cell && cell <= 'z' && cell != lowerId)
     {
+        char otherId = static_cast<char>(std::toupper(static_cast<unsigned char>(cell)));
+        Snake* otherSnake = findSnake(otherId);
+
+        Segment* bittenSegment = otherSnake->getBody().findAt(newRow, newCol);
+
+        int bittenRow = bittenSegment->getRow();
+        int bittenCol = bittenSegment->getCol();
+
+        SnakeBody bittenPart = otherSnake->getBody().splitAt(bittenRow, bittenCol);
+        int bittenLength = bittenPart.getLength();
+        Segment* current = bittenPart.getHead();
+
+        while(current != nullptr)
+        {
+            Segment* next = current->getNext();
+            int row = current->getRow();
+            int col = current->getCol();
+            
+            board.set(row, col, FOOD_CELL);
+            current = next;
+        }
+        int oldHeadRow = head->getRow();
+        int oldHeadCol = head->getCol();
+
+        s->getBody().pushFront(newRow, newCol);
+
+        board.set(oldHeadRow, oldHeadCol, static_cast<char>(std::tolower(static_cast<unsigned char>(s->getId()))));
+        board.set(newRow, newCol, static_cast<char>(std::toupper(static_cast<unsigned char>(s->getId()))));
+
+        s->addScore(1);
+        leaderboard.reposition(s);
         
-    }else if(!isOwnTail)
-    {
+        std::cout << "Snake " << s->getId() << " bit" << otherSnake->getId() << "at (" << newRow << "," << newCol << ")." << std::endl; 
+        std::cout << "Snake" << otherSnake->getId() << "lost" << bittenLength << "segment(s)." << std::endl;
+        std::cout << "Snake " << s->getId() << " ate food at (" << newRow << "," << newCol << ")." << std::endl;
 
     }
 
