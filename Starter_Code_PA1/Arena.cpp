@@ -167,7 +167,7 @@ void Arena::moveSnake(Snake *s)
     
     if(!board.inBounds(newRow, newCol))
     {
-        std::cout << "Snake " << s->getId() << " hit a wall at (" << newRow << "," << newCol << ")" << std::endl;
+        std::cout << "Snake " << s->getId() << " hit a wall at (" << newRow << "," << newCol << ")." << std::endl;
         killSnake(s);
         return;
     }
@@ -179,7 +179,18 @@ void Arena::moveSnake(Snake *s)
     
     if(board.get(newRow, newCol) == EMPTY_CELL)
     {
-        
+        int oldHeadRow = head->getRow();
+        int oldHeadCol = head->getCol();
+
+        s->getBody().pushFront(newRow, newCol);
+        bool popSituation = s->getBody().popBack(tailRow, tailCol);
+        board.set(oldHeadRow, oldHeadCol, static_cast<char>(std::tolower(static_cast<unsigned char>(s->getId()))));
+
+        board.set(tailRow, tailCol, EMPTY_CELL);
+
+        board.set(newRow, newCol, static_cast<char>(std::toupper(static_cast<unsigned char>(s->getId()))));
+
+
     }else if(board.get(newRow, newCol) == static_cast<char>(std::tolower(static_cast<unsigned char>(s->getId()))))
     {
 
