@@ -141,7 +141,7 @@ void Arena::killSnake(Snake *s)
     }
     s->setAlive(false);
     leaderboard.remove(s);
-    
+
 }
 
 // ---------------------------------------------------------------- movement
@@ -156,6 +156,50 @@ void Arena::moveSnake(Snake *s)
     //   "Snake A bit Snake B at (nr,nc). Snake B lost K segment(s)."
     //   "Snake A ate food at (nr,nc)."
     // The board must always show the head as the uppercase id, body as lowercase.
+    Segment* head = s->getBody().getHead();
+    int newRow = head->getRow();
+    int newCol = head->getCol();
+    s->getNextHeadPosition(newRow, newCol);
+
+    Segment* tail = s->getBody().getTail();
+    int tailRow = tail->getRow();
+    int tailCol = tail->getCol();
+    
+    if(!board.inBounds(newRow, newCol))
+    {
+        std::cout << "Snake " << s->getId() << " hit a wall at (" << newRow << "," << newCol << ")" << std::endl;
+        killSnake(s);
+        return;
+    }
+    
+
+    bool isOwnTail = (newRow == tailRow && newCol == tailCol);
+
+   
+    
+    if(board.get(newRow, newCol) == EMPTY_CELL)
+    {
+        
+    }else if(board.get(newRow, newCol) == static_cast<char>(std::tolower(static_cast<unsigned char>(s->getId()))))
+    {
+
+    }else if(board.get(newRow, newCol) == FOOD_CELL)
+    {
+
+    }else if(board.get(newRow, newCol) == WALL_CELL)
+    {
+        std::cout << "Snake " << s->getId() << " hit a wall at (" << newRow << "," << newCol << ")." << std::endl;
+        killSnake(s);
+        return;
+    }else if(isOwnTail)
+    {
+        
+    }else if(!isOwnTail)
+    {
+
+    }
+
+
 }
 
 void Arena::tick()
