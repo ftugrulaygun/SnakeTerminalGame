@@ -17,7 +17,7 @@ bool Snake::turn(Direction newDir)
         int movedRow = snakeHead->getRow() + rowDelta(newDir);
         int movedCol = snakeHead->getCol() + colDelta(newDir);
 
-        if(movedRow == snakeNeck->getRow() && movedCol == snakeHead->getCol())
+        if(movedRow == snakeNeck->getRow() && movedCol == snakeNeck->getCol())
         {
             return false;
         }

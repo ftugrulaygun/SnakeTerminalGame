@@ -52,6 +52,7 @@ void Arena::addSnake(Snake *s)
     {
         firstSnake = lastSnake = s;
     }else{
+        s->setNext(nullptr);
         lastSnake->setNext(s);
         lastSnake = s;
     }
@@ -554,19 +555,20 @@ void Arena::cmdTick(const std::string &args)
 // Given ready
 void Arena::printSnakes() const
 {
-    std::cout << "--- Snakes ---" << std::endl;
+   std::cout << "--- Snakes ---" << std::endl;
     if (!firstSnake)
     {
         std::cout << "No snakes in the arena." << std::endl;
         return;
     }
-    for (Snake *cur = firstSnake; cur; cur = cur->getNext())
-    {
-        std::cout << cur->getId() << " " << directionToString(cur->getDirection())
+    for (Snake *cur = firstSnake; cur != nullptr; cur = cur->getNext())
+   {
+     std::cout << cur->getId() << " " << directionToString(cur->getDirection())
                   << " length=" << cur->getLength() << " score=" << cur->getScore()
                   << ": " << cur->getBody() << std::endl;
     }
 }
+
 
 // Given ready
 void Arena::processCommand(const std::string &line)

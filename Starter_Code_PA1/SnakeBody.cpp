@@ -69,6 +69,8 @@ void SnakeBody::pushBack(int row, int col)
         newSegment->setPrev(tail);
         tail = newSegment;
     }
+
+    length++;
 }
 
 bool SnakeBody::popBack(int &row, int &col)

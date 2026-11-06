@@ -35,6 +35,10 @@ Board::Board(Board &&other) noexcept
     : rows(0), cols(0), cells(nullptr)
 {
     // TODO: Take over other's matrix, leave other as an empty board (0, 0, nullptr).
+    rows = other.rows;
+    cols = other.cols;
+    cells = other.cells;
+    
     other.rows = 0;
     other.cols = 0;
     other.cells = nullptr;

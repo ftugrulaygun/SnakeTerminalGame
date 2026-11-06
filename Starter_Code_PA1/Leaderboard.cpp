@@ -28,7 +28,7 @@ void Leaderboard::insertSorted(Snake *s)
             }
             current = current->next;
         }
-        node->next = current;
+        node->next = current->next;
         current->next = node;
     }
 
@@ -40,40 +40,44 @@ bool Leaderboard::remove(Snake *s)
     // TODO: Find the node whose snake == s, unlink and delete the NODE.
     // Do NOT delete the snake itself; the Arena owns the snakes.
     // Return false if not found.
-    if(head == nullptr)
-    {
-        return false;
-    }
-    if(head->snake == s)
-    {
-        RankNode* toBeDeleted = head;
-        head = head->next;
-        delete toBeDeleted;
-        size--;
-        return true; 
-    }
-    
+
+    RankNode* previous = nullptr;
     RankNode* current = head;
+    
     while(current != nullptr)
     {
         if(current->snake == s)
         {
-            RankNode* toBeDeleted = current;
-            current = current->next;
-            delete toBeDeleted;
+            if(previous == nullptr)
+            {
+                head = current->next;
+            }
+                
+            else
+            {
+                previous->next = current->next;
+            }
+
+            delete current;
             size--;
             return true;
         }
+        previous = current;
         current = current->next;
+        
     }
     return false;
+
+    
 }
 
 void Leaderboard::reposition(Snake *s)
 {
     // TODO: Called after s's score changed. Put s back at its correct place.
-    remove(s);
-    insertSorted(s);
+    if(remove(s))
+    {
+        insertSorted(s);
+    }
 }
 
 void Leaderboard::clear()
@@ -82,9 +86,10 @@ void Leaderboard::clear()
     RankNode* current = head;
 
     while(current != nullptr)
-    {
+    {   
+        RankNode* next = current->next;
         delete current;
-        current = current->next;
+        current = next;
     }
     head = nullptr;
     size = 0;
