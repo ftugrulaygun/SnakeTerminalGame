@@ -271,9 +271,32 @@ void Arena::moveSnake(Snake *s)
         std::cout << "Snake" << otherSnake->getId() << "lost" << bittenLength << "segment(s)." << std::endl;
         std::cout << "Snake " << s->getId() << " ate food at (" << newRow << "," << newCol << ")." << std::endl;
 
+    }else if('A' <= cell && cell <= 'Z' && cell != static_cast<char>(std::toupper(static_cast<unsigned char>(lowerId))))
+    {
+        char otherId = cell;
+        Snake* otherSnake = findSnake(otherId);
+        int snakeLength = s->getBody().getLength();
+        int otherLength = otherSnake->getBody().getLength();
+
+        std::cout << "Snake " << s->getId() << " and Snake "<< otherSnake->getId() << " collided head-on at (" << newRow << "," << newCol << ")." << std::endl;
+        if(snakeLength > otherLength)
+        {
+            killSnake(otherSnake);
+            s->addScore(1);
+            leaderboard.reposition(s);
+            s->getBody().pushFront(newRow, newCol);
+        }else if(otherLength > snakeLength)
+        {
+            killSnake(s);
+            otherSnake->addScore(1);
+            leaderboard.reposition(otherSnake);
+            otherSnake->getBody().pushFront(newRow, newCol);
+        }else
+        {
+            killSnake(s);
+            killSnake(otherSnake);
+        }
     }
-
-
 }
 
 void Arena::tick()
