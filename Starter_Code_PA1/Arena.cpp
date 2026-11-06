@@ -103,12 +103,10 @@ void Arena::removeDeadSnakes()
             }else if(current == lastSnake)
             {   
                 delete current;
-                lastSnake = previous;
-                previous = lastSnake;
-                previous->setNext(nullptr);
+                lastSnake = previous;   
+                lastSnake->setNext(nullptr);
             }else
             {
-                Snake* next = current->getNext();
                 delete current;
                 previous->setNext(next);
             }
@@ -311,7 +309,7 @@ void Arena::tick()
     //  - snakes that died during this tick must not move
     //  - dead snakes must be removed from the player list before the tick ends
     tickCount++;
-    std::cout << "--- Tick "<< tickCount << "---" << std::endl;
+    std::cout << "--- Tick "<< tickCount << " ---" << std::endl;
 
     Snake* current = firstSnake;
 
@@ -457,7 +455,7 @@ void Arena::cmdSpawn(const std::string &args)
     addSnake(spawnedSnake);
     leaderboard.insertSorted(spawnedSnake);
 
-    std::cout << "Snake " << id << " spawned at (" << r << "," << c << ") facing " << dirStr << " with length " << length << "." << std::endl;
+    std::cout << "Snake " << id << " spawned at (" << r << "," << c << ") facing " << directionToString(dir) << " with length " << length << "." << std::endl;
 }
 
 void Arena::cmdTurn(const std::string &args)
@@ -466,6 +464,35 @@ void Arena::cmdTurn(const std::string &args)
     //  "Error: Snake <id> not found."
     //  "Error: Snake <id> cannot turn back."
     //  "Snake <id> is now facing <DIR>."
+
+    std::istringstream ss(args);
+    std::string dirStr;
+    char id;
+
+    ss >> id >> dirStr;
+
+    Direction dir;
+
+    bool parseSit = parseDirection(dirStr, dir);
+
+    Snake* currentSnake = findSnake(id);
+
+    if(currentSnake == nullptr)
+    {
+        std::cout << "Error: Snake " << id << " not found." << std::endl;
+        return;
+    }
+
+    bool turnSit = currentSnake->turn(dir);
+    if(!turnSit)
+    {
+        std::cout << "Error: Snake " << id << " cannot turn back." << std::endl;
+        return;
+    }
+    else
+    {
+        std::cout << "Snake " << id << " is now facing " << directionToString(dir) << "." << std::endl;
+    }
 }
 
 void Arena::cmdReverse(const std::string &args)
@@ -474,11 +501,54 @@ void Arena::cmdReverse(const std::string &args)
     //  "Error: Snake <id> not found."
     //  Update the board too (old head becomes lowercase, new head uppercase).
     //  "Snake <id> reversed and is now facing <DIR>."
+
+    std::istringstream ss(args);
+    char id;
+    ss >> id;
+    if(findSnake(id) == nullptr){
+        std::cout << "Error: Snake " << id << " not found." << std::endl;
+        return;
+    }
+    
+    Snake* currentSnake = findSnake(id);
+
+    if(currentSnake->getBody().getLength() == 1)
+    {
+        currentSnake->reverse();
+        std::cout << "Snake " << id << " reversed and is now facing " << directionToString(currentSnake->getDirection()) << std::endl;
+        return;
+    }
+    
+
+    char headID = static_cast<char>(std::toupper(static_cast<unsigned char>(currentSnake->getId())));
+    char tailID = static_cast<char>(std::tolower(static_cast<unsigned char>(currentSnake->getId()))); 
+
+    int headRow = currentSnake->getBody().getHead()->getRow();
+    int headCol = currentSnake->getBody().getHead()->getCol();
+
+    int tailRow = currentSnake->getBody().getTail()->getRow();
+    int tailCol = currentSnake->getBody().getTail()->getCol();
+
+    currentSnake->reverse();
+
+    board.set(headRow, headCol, tailID);
+    board.set(tailRow, tailCol, headID);
+
+    std::cout << "Snake " << id << " reversed and is now facing " << directionToString(currentSnake->getDirection()) << std::endl;
+
 }
 
 void Arena::cmdTick(const std::string &args)
 {
     // TODO: TICK [n]   (n is optional, default 1)
+    int n = 1;
+    std::istringstream ss(args);
+    ss >> n;
+
+    for(int i = 0; i < n; i++)
+    {
+        tick();
+    }
 }
 
 // Given ready
